@@ -7,6 +7,7 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
+    memberships = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -22,10 +23,31 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active',
             'is_platform_staff',
             'email_verified',
+            'memberships',
             'date_joined',
             'last_login',
         ]
-        read_only_fields = ['id', 'email', 'is_active', 'is_platform_staff', 'email_verified', 'date_joined', 'last_login']
+        read_only_fields = ['id', 'email', 'is_active', 'is_platform_staff', 'email_verified', 'memberships', 'date_joined', 'last_login']
+
+    def get_memberships(self, obj):
+        try:
+            from apps.memberships.models import TenantMembership, MembershipStatus
+            memberships = TenantMembership.objects.filter(
+                user=obj,
+                status=MembershipStatus.ACTIVE
+            ).select_related('tenant').prefetch_related('roles')
+            return [
+                {
+                    'tenant_id': str(m.tenant.id),
+                    'tenant_name': m.tenant.name,
+                    'tenant_slug': m.tenant.slug,
+                    'roles': list(m.roles.values_list('slug', flat=True)),
+                    'is_admin': m.is_admin,
+                }
+                for m in memberships
+            ]
+        except Exception:
+            return []
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

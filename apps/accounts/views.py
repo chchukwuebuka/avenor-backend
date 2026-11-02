@@ -83,3 +83,38 @@ class ChangePasswordView(generics.GenericAPIView):
             'success': True,
             'message': 'Password has been updated successfully.'
         })
+
+
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+
+@extend_schema(
+    summary='Logout & Invalidate Refresh Token',
+    description='Blacklists the provided refresh token so it cannot be used again.',
+    responses={
+        200: OpenApiResponse(description='Logged out successfully'),
+        400: OpenApiResponse(description='Invalid or expired token'),
+    }
+)
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.data.get('refresh')
+        if not refresh_token:
+            return Response(
+                {'error': 'A refresh token is required for logout.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(
+                {'success': True, 'message': 'Successfully logged out.'},
+                status=status.HTTP_200_OK
+            )
+        except TokenError:
+            return Response(
+                {'error': 'Invalid or expired token.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
