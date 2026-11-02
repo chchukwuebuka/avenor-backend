@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'apps.assessments.apps.AssessmentsConfig',
     'apps.communications.apps.CommunicationsConfig',
     'apps.finance.apps.FinanceConfig',
+    'apps.analytics.apps.AnalyticsConfig',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
