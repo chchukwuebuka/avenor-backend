@@ -1,0 +1,28 @@
+# Python & Virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+ENV/
+.Python
+*.sqlite3
+
+# Media and Static files
+media/
+staticfiles/
+
+# Environment Variables
+.env
+.env.local
+!.env.example
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
