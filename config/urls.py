@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/v1/courses/', include('apps.courses.urls')),
     path('api/v1/enrollments/', include('apps.enrollments.urls')),
     path('api/v1/assessments/', include('apps.assessments.urls')),
+    path('api/v1/communications/', include('apps.communications.urls')),
     
     # OpenAPI Schema & Swagger UI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
