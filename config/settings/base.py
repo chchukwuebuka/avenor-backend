@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'apps.accounts.apps.AccountsConfig',
     'apps.tenants.apps.TenantsConfig',
     'apps.memberships.apps.MembershipsConfig',
+    'apps.courses.apps.CoursesConfig',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
