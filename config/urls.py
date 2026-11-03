@@ -3,15 +3,61 @@ from django.urls import path, include
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-def health_check(request):
+from django.utils import timezone
+from django.db import connection
+from django.core.cache import cache
+
+def healthz(request):
+    """Aggregated health check for container runtimes."""
     return JsonResponse({
         'status': 'healthy',
-        'platform': 'Avenor SaaS API',
+        'platform': 'AVENOR SaaS API',
         'version': '1.0.0',
-        'environment': 'development'
+        'timestamp': timezone.now().isoformat(),
     })
 
+def livez(request):
+    """Liveness probe: verifies process responsiveness."""
+    return JsonResponse({
+        'status': 'alive',
+        'timestamp': timezone.now().isoformat(),
+    })
+
+def readyz(request):
+    """Readiness probe: verifies database and cache connectivity."""
+    checks = {}
+    is_ready = True
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+            cursor.fetchone()
+        checks['database'] = 'connected'
+    except Exception as e:
+        checks['database'] = f'error: {str(e)}'
+        is_ready = False
+
+    try:
+        cache.set('__readyz_check__', 'ok', timeout=10)
+        val = cache.get('__readyz_check__')
+        checks['cache'] = 'connected' if val == 'ok' else 'degraded'
+    except Exception as e:
+        checks['cache'] = f'warning: {str(e)}'
+
+    status_code = 200 if is_ready else 503
+    return JsonResponse({
+        'status': 'ready' if is_ready else 'not_ready',
+        'checks': checks,
+        'timestamp': timezone.now().isoformat(),
+    }, status=status_code)
+
+def health_check(request):
+    return healthz(request)
+
 urlpatterns = [
+    path('healthz/', healthz, name='healthz'),
+    path('livez/', livez, name='livez'),
+    path('readyz/', readyz, name='readyz'),
     path('admin/', admin.site.urls),
     path('api/v1/health/', health_check, name='health-check'),
     path('api/v1/auth/', include('apps.accounts.urls')),
