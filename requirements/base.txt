@@ -7,9 +7,12 @@ django-cors-headers>=4.4,<4.5
 # Database Driver for PostgreSQL 17 & Python 3.13
 psycopg[binary]>=3.2,<3.3
 
-# Asynchronous Task Processing & Caching
+# Asynchronous Task Processing, Real-Time WebSockets & Caching
+daphne>=4.1,<4.2
 celery>=5.4,<5.5
 redis>=5.0,<5.1
+channels>=4.2,<4.3
+channels-redis>=4.3,<4.4
 
 # Environment Configuration
 python-dotenv>=1.0,<1.1
